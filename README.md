@@ -9,7 +9,7 @@ considered stable**
 
 [![Build Status](https://travis-ci.org/moogar0880/negotiator.svg?branch=master)](https://travis-ci.org/moogar0880/negotiator)
 [![Go Report Card](https://goreportcard.com/badge/github.com/moogar0880/negotiator)](https://goreportcard.com/report/github.com/moogar0880/negotiator)
-[![GoDoc](https://godoc.org/github.com/moogar0880/negotiator?status.svg)](https://godoc.org/github.com/moogar0880/negotiator) 
+[![GoDoc](https://godoc.org/github.com/moogar0880/negotiator?status.svg)](https://godoc.org/github.com/moogar0880/negotiator)
 
 ## Installation
 ```bash
@@ -49,9 +49,10 @@ func init() {
 }
 
 func MessageHandler(w http.ResponseWriter, req *http.Request) {
-  model, err := Registry.Negotiate(r.Headers["Accept"])
+  model, accept, err := Registry.Negotiate(r.Header.Get("Accept"))
   if err != nil {
-    http.Error(w, "Not Acceptable", http.StatusNotAcceptable)
+    msg := fmt.Sprintf("Invalid Accept Header: %s", accept.MediaRange)
+    http.Error(w, msg, http.StatusNotAcceptable)
     return
   }
 
