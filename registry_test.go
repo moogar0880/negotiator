@@ -39,7 +39,7 @@ func TestRegistryNegotiate(t *testing.T) {
 	var i interface{}
 	var err error
 	for _, test := range testio {
-		i, err = testReg.Negotiate(test.inp)
+		i, _, err = testReg.Negotiate(test.inp)
 
 		if i != nil && test.expected == nil {
 			t.Errorf("Expected %s to return nil. Got %+v instead", test.expected, i)
@@ -78,7 +78,7 @@ func TestRegistryContentType(t *testing.T) {
 	var i interface{}
 	var err error
 	for _, test := range testio {
-		i, err = testReg.ContentType(test.inp)
+		i, _, err = testReg.ContentType(test.inp)
 
 		if i != nil && test.expected == nil {
 			t.Errorf("Expected %s to return nil. Got %+v instead", test.expected, i)
