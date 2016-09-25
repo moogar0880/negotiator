@@ -45,10 +45,11 @@ func TestAcceptParams(t *testing.T) {
 			map[string]string{"indent": "4", "charset": "utf8"}},
 	}
 
-	var acpt *Accept
 	for _, test := range testio {
-		acpt = NewAccept()
-		acpt.Parse(test.inp)
+		acpt, err := ParseAccept(test.inp)
+		if err != nil {
+			t.Errorf("Unable to parse valid header: %s", test.inp)
+		}
 
 		for k, v := range test.expected {
 			if val, ok := acpt.AcceptParams[k]; ok {
@@ -73,11 +74,8 @@ func TestBadParams(t *testing.T) {
 		{"application/json;foobar", true},
 	}
 
-	var acpt *Accept
-	var err error
 	for _, test := range testio {
-		acpt = NewAccept()
-		err = acpt.Parse(test.inp)
+		_, err := ParseAccept(test.inp)
 
 		if err == nil && test.fail == true {
 			t.Errorf("Expected header %s to contain a bad header param", test.inp)
@@ -97,10 +95,11 @@ func TestAcceptQuality(t *testing.T) {
 		{"application/json;indent=4; q=0.4", 0.4},
 	}
 
-	var acpt *Accept
 	for _, test := range testio {
-		acpt = NewAccept()
-		acpt.Parse(test.inp)
+		acpt, err := ParseAccept(test.inp)
+		if err != nil {
+			t.Errorf("Unable to parse valid header: %s", test.inp)
+		}
 
 		if acpt.Quality != test.expected {
 			t.Errorf("Expected quality of %f, got %f instead", test.expected, acpt.Quality)
@@ -119,11 +118,8 @@ func TestBadQuality(t *testing.T) {
 		{"application/json;q=foobar", true},
 	}
 
-	var acpt *Accept
-	var err error
 	for _, test := range testio {
-		acpt = NewAccept()
-		err = acpt.Parse(test.inp)
+		_, err := ParseAccept(test.inp)
 
 		if err == nil && test.fail == true {
 			t.Errorf("Expected header %s to contain a bad quality value", test.inp)
@@ -143,10 +139,11 @@ func TestAcceptExtensions(t *testing.T) {
 			map[string]string{"version": "2"}},
 	}
 
-	var acpt *Accept
 	for _, test := range testio {
-		acpt = NewAccept()
-		acpt.Parse(test.inp)
+		acpt, err := ParseAccept(test.inp)
+		if err != nil {
+			t.Errorf("Unable to parse valid header: %s", test.inp)
+		}
 
 		for k, v := range test.expected {
 			if val, ok := acpt.AcceptExt[k]; ok {

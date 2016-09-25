@@ -177,3 +177,14 @@ func (a *Accept) parseQuality(val string) error {
 	a.Quality = flt
 	return nil
 }
+
+// ParseAccept parses the provided accept header and returns a newly created
+// Accept struct, and a conditional error
+func ParseAccept(header string) (*Accept, error) {
+	acpt := NewAccept()
+	err := acpt.Parse(header)
+	if err != nil {
+		return nil, err
+	}
+	return acpt, nil
+}
