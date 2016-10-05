@@ -16,6 +16,7 @@ func TestMediaRange(t *testing.T) {
 		{mediaRange("*/*"), "*", "*", ""},
 		{mediaRange("application/json;indent=4"), "application", "json", ""},
 		{mediaRange("application/resource+json;indent=4"), "application", "resource+json", "json"},
+		{mediaRange("application resource"), "", "", ""},
 	}
 
 	for _, test := range testio {
@@ -29,6 +30,26 @@ func TestMediaRange(t *testing.T) {
 
 		if test.suffix != test.inp.Suffix() {
 			t.Errorf("Expected Suffix %s, got %s instead", test.suffix, test.inp.Suffix())
+		}
+	}
+}
+
+func TestBadMediaRange(t *testing.T) {
+	testio := []struct {
+		inp string
+		err error
+	}{
+		{"application/json", nil},
+		{"application/*", nil},
+		{"*/*", nil},
+		{"application/json;indent=4", nil},
+		{"application/resource+json;indent=4", nil},
+		{"application resource", ErrInvalidMediaRange},
+	}
+
+	for _, test := range testio {
+		if _, err := ParseAccept(test.inp); err != test.err {
+			t.Errorf("Expected %s, got %s", test.err, err)
 		}
 	}
 }

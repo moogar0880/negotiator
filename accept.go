@@ -29,6 +29,10 @@ const (
 )
 
 var (
+	// ErrInvalidMediaRange is the error returned when an invalid accept
+	// media range is parsed
+	ErrInvalidMediaRange = errors.New("Invalid Accept Media Range")
+
 	// ErrInvalidAcceptParam is the error returned when an invalid accept
 	// parameter is parsed
 	ErrInvalidAcceptParam = errors.New("Invalid Accept Parameter")
@@ -52,6 +56,9 @@ type (
 func (m mediaRange) Type() string {
 	var s = string(m)
 	var idx = strings.Index(s, "/")
+	if idx == -1 {
+		return ""
+	}
 	return s[:idx]
 }
 
@@ -61,6 +68,10 @@ func (m mediaRange) SubType() string {
 	var s = string(m)
 	var start = strings.Index(s, "/")
 	var end = strings.Index(s, ";")
+
+	if start == -1 {
+		return ""
+	}
 
 	if end < start {
 		return s[start+1:]
@@ -116,7 +127,12 @@ func (a *Accept) calculateQuality() {
 // Parse parses the provided string argument into an Accept instance, returning
 // an error if the provided value is not properly formatted
 func (a *Accept) Parse(accept string) error {
-	var idx = strings.Index(accept, ";")
+	var idx = strings.Index(accept, "/")
+	if idx == -1 {
+		return ErrInvalidMediaRange
+	}
+
+	idx = strings.Index(accept, ";")
 	a.parseMediaRange(accept, idx)
 
 	// if there was more than a simple media range provided, parse it and return
