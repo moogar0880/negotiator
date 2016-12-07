@@ -131,10 +131,10 @@ func (m *Message) MarshalMedia(a *Accept) ([]byte, error) {
   switch a.MediaRange {
   case v1JSONMediaType:
     data, _ := json.Marshal(MessageV1{Name: m.Name, Greeting: m.Greeting.Phrase})
-		return data, nil
+    return data, nil
   case v2JSONMediaType:
     data, _ := json.Marshal(m)
-		return data, nil
+    return data, nil
   }
   return nil, errors.New("Unsupported Media Type")
 }
