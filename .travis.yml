@@ -7,5 +7,5 @@ go:
  - tip
 
 script:
- - make vendor
- - make test
+  - go get github.com/Masterminds/glide
+  - make ci
