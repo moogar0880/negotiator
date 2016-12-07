@@ -49,10 +49,9 @@ func init() {
 }
 
 func MessageHandler(w http.ResponseWriter, req *http.Request) {
-  model, accept, err := Registry.Negotiate(r.Header.Get("Accept"))
+  model, accept, err := Registry.Negotiate(req.Header.Get("Accept"))
   if err != nil {
-    msg := fmt.Sprintf("Invalid Accept Header: %s", accept.MediaRange)
-    http.Error(w, msg, http.StatusNotAcceptable)
+    http.Error(w, "Invalid Accept Header", http.StatusNotAcceptable)
     return
   }
 
