@@ -60,7 +60,7 @@ func ParseHeader(header string) (AcceptHeader, error) {
 	values := strings.Split(header, ",")
 	for _, value := range values {
 		act = NewAccept()
-		err = act.Parse(value)
+		err = act.Parse(strings.TrimSpace(value))
 		if err != nil {
 			return nil, err
 		}

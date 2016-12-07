@@ -2,6 +2,8 @@ package negotiator
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMediaRange(t *testing.T) {
@@ -20,17 +22,11 @@ func TestMediaRange(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		if test.typ != test.inp.Type() {
-			t.Errorf("Expected Type %s, got %s instead", test.typ, test.inp.Type())
-		}
-
-		if test.subtyp != test.inp.SubType() {
-			t.Errorf("Expected SubType %s, got %s instead", test.subtyp, test.inp.SubType())
-		}
-
-		if test.suffix != test.inp.Suffix() {
-			t.Errorf("Expected Suffix %s, got %s instead", test.suffix, test.inp.Suffix())
-		}
+		t.Run(test.inp.Type(), func(t *testing.T) {
+			assert.Equal(t, test.typ, test.inp.Type(), "Types did not match")
+			assert.Equal(t, test.subtyp, test.inp.SubType(), "Subtypes did not match")
+			assert.Equal(t, test.suffix, test.inp.Suffix(), "Suffixes did not match")
+		})
 	}
 }
 
@@ -48,9 +44,11 @@ func TestBadMediaRange(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		if _, err := ParseAccept(test.inp); err != test.err {
-			t.Errorf("Expected %s, got %s", test.err, err)
-		}
+		t.Run(test.inp, func(t *testing.T) {
+			if _, err := ParseAccept(test.inp); err != test.err {
+				t.Errorf("Expected %s, got %s", test.err, err)
+			}
+		})
 	}
 }
 
@@ -67,20 +65,18 @@ func TestAcceptParams(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		acpt, err := ParseAccept(test.inp)
-		if err != nil {
-			t.Errorf("Unable to parse valid header: %s", test.inp)
-		}
+		t.Run(test.inp, func(t *testing.T) {
+			acpt, err := ParseAccept(test.inp)
 
-		for k, v := range test.expected {
-			if val, ok := acpt.AcceptParams[k]; ok {
-				if v != val {
-					t.Errorf("expected %s: %s to equal %s", k, val, v)
-				}
-			} else {
-				t.Errorf("Expected key %s not found in parsed params", k)
+			assert.Nil(t, err, "Unable to parse valid header: %s", test.inp)
+
+			for k, v := range test.expected {
+				assert.Contains(t, acpt.AcceptParams, k,
+					"Expected key %s not found in parsed params", k)
+				assert.Equal(t, acpt.AcceptParams[k], v,
+					"expected %s: %s to equal %s", k, acpt.AcceptParams[k], v)
 			}
-		}
+		})
 	}
 }
 
@@ -96,11 +92,13 @@ func TestBadParams(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		_, err := ParseAccept(test.inp)
+		t.Run(test.inp, func(t *testing.T) {
+			_, err := ParseAccept(test.inp)
 
-		if err == nil && test.fail == true {
-			t.Errorf("Expected header %s to contain a bad header param", test.inp)
-		}
+			failed := err == nil && test.fail == true
+			assert.False(t, failed,
+				"Expected header %s to contain a bad header param", test.inp)
+		})
 	}
 }
 
@@ -117,14 +115,12 @@ func TestAcceptQuality(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		acpt, err := ParseAccept(test.inp)
-		if err != nil {
-			t.Errorf("Unable to parse valid header: %s", test.inp)
-		}
-
-		if acpt.Quality != test.expected {
-			t.Errorf("Expected quality of %f, got %f instead", test.expected, acpt.Quality)
-		}
+		t.Run(test.inp, func(t *testing.T) {
+			acpt, err := ParseAccept(test.inp)
+			assert.Nil(t, err, "Unable to parse valid header: %s", test.inp)
+			assert.Equal(t, test.expected, acpt.Quality,
+				"Expected quality of %f, got %f instead", test.expected, acpt.Quality)
+		})
 	}
 }
 
@@ -140,11 +136,13 @@ func TestBadQuality(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		_, err := ParseAccept(test.inp)
+		t.Run(test.inp, func(t *testing.T) {
+			_, err := ParseAccept(test.inp)
 
-		if err == nil && test.fail == true {
-			t.Errorf("Expected header %s to contain a bad quality value", test.inp)
-		}
+			failed := err == nil && test.fail == true
+			assert.False(t, failed,
+				"Expected header %s to contain a bad quality value", test.inp)
+		})
 	}
 }
 
@@ -161,19 +159,16 @@ func TestAcceptExtensions(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		acpt, err := ParseAccept(test.inp)
-		if err != nil {
-			t.Errorf("Unable to parse valid header: %s", test.inp)
-		}
+		t.Run(test.inp, func(t *testing.T) {
+			acpt, err := ParseAccept(test.inp)
+			assert.Nil(t, err, "Unable to parse valid header: %s", test.inp)
 
-		for k, v := range test.expected {
-			if val, ok := acpt.AcceptExt[k]; ok {
-				if v != val {
-					t.Errorf("expected %s: %s to equal %s", k, val, v)
-				}
-			} else {
-				t.Errorf("Expected key %s not found in parsed params", k)
+			for k, v := range test.expected {
+				assert.Contains(t, acpt.AcceptExt, k,
+					"Expected key %s not found in parsed params", k)
+				assert.Equal(t, acpt.AcceptExt[k], v,
+					"expected %s: %s to equal %s", k, acpt.AcceptExt[k], v)
 			}
-		}
+		})
 	}
 }
