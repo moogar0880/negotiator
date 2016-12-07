@@ -47,12 +47,12 @@ func (m *Message) ContentType(a *Accept) (string, error) {
 // handle encoding a message resource into a byte slice
 func (m *Message) MarshalMedia(a *Accept) ([]byte, error) {
   data, _ := json.Marshal(m)
-	return data, nil
+  return data, nil
 }
 
 // handle unmarshalling a message from an http request body
 func (m *Message) UnmarshalMedia(cType string, params ContentTypeParams, body []byte) error {
-	json.Unmarshal(body, &tcn)
+  json.Unmarshal(body, &tcn)
   return nil
 }
 
