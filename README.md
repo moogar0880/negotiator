@@ -4,9 +4,6 @@ typing in RESTful HTTP services. This library implements both `Accept` and
 `Content-Type` header parsers and struct variants that are fully compliant with
 both RFC-6839 and RFC-7231.
 
-**WARNING: This library is still under active development and should not yet be
-considered stable**
-
 [![Build Status](https://travis-ci.org/moogar0880/negotiator.svg?branch=master)](https://travis-ci.org/moogar0880/negotiator)
 [![Go Report Card](https://goreportcard.com/badge/github.com/moogar0880/negotiator)](https://goreportcard.com/report/github.com/moogar0880/negotiator)
 [![GoDoc](https://godoc.org/github.com/moogar0880/negotiator?status.svg)](https://godoc.org/github.com/moogar0880/negotiator)
