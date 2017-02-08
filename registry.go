@@ -26,7 +26,8 @@ func NewRegistry() *Registry {
 }
 
 // Register registers the default struct value for a content type in the
-// registry
+// registry. when requested, a copy of the default value will be provided as
+// the result of a call to Negotiate
 func (r Registry) Register(contentType string, defaultValue interface{}) {
 	if reflect.TypeOf(defaultValue).Kind() == reflect.Ptr {
 		r[contentType] = reflect.ValueOf(defaultValue).Elem().Interface()
