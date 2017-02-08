@@ -7,11 +7,9 @@ import (
 	"net/http"
 )
 
-const (
-	// ContentTypeHeader is the constant value for the key indicating the
-	// Content-Type header
-	ContentTypeHeader = "Content-Type"
-)
+// ContentTypeHeader is the constant value for the key indicating the
+// Content-Type header
+const ContentTypeHeader = "Content-Type"
 
 // The ContentNegotiator interface defines the mechanism through which arbitrary
 // interfaces can be provided information about the provided Accept and
