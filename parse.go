@@ -11,11 +11,11 @@ type AcceptHeader []*Accept
 
 // By is the type of a "less" function that defines the ordering of its Accept
 // arguments.
-type By func(a1, a2 *Accept) bool
+type by func(a1, a2 *Accept) bool
 
 // Sort is a method on the function type, By, that sorts the argument slice
 // according to the function.
-func (by By) Sort(accept AcceptHeader) {
+func (by by) Sort(accept AcceptHeader) {
 	rs := &acceptSorter{
 		accepts: accept,
 		by:      by, // The Sort method's receiver is the function (closure) that defines the sort order.
@@ -45,8 +45,8 @@ func (a *acceptSorter) Less(i, j int) bool {
 	return a.by(a.accepts[i], a.accepts[j])
 }
 
-// ByWeight is a "by" closure which sorts based on an Accept's Quality field
-func ByWeight(a1, a2 *Accept) bool {
+// byWeight is a "by" closure which sorts based on an Accept's Quality field
+func byWeight(a1, a2 *Accept) bool {
 	return a1.Quality > a2.Quality
 }
 
@@ -67,6 +67,6 @@ func ParseHeader(header string) (AcceptHeader, error) {
 		accepts = append(accepts, act)
 	}
 
-	By(ByWeight).Sort(accepts)
+	by(byWeight).Sort(accepts)
 	return accepts, nil
 }
