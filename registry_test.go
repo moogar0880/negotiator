@@ -23,6 +23,8 @@ func TestRegistryNegotiate(t *testing.T) {
 	testReg := NewRegistry()
 	testReg.Register("application/json", testGeneric{})
 	testReg.Register("application/vnd.dyn.zone+json", &testSpecific{})
+	testReg.Register("application/xhtml+xml", &testSpecific{})
+	testReg.Register("*/*", &testGeneric{})
 
 	testio := []struct {
 		inp      string
@@ -34,6 +36,12 @@ func TestRegistryNegotiate(t *testing.T) {
 		{"application/json;foo", nil, ErrInvalidAcceptParam.Error()},
 		{"*/*,application/json,application/vnd.dyn.zone+json;format=foo,application/*",
 			testSpecific{}, ""},
+		{"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
+			testSpecific{}, ""},
+		{"text/html, application/xhtml+xml, application/xml;q=0.9, image/webp, /;q=0.8",
+			testSpecific{}, ""},
+		{"image/jpeg, image/webp, */*",
+			testGeneric{}, ""},
 	}
 
 	var i interface{}

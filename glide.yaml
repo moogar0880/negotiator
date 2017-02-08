@@ -1,0 +1,7 @@
+package: github.com/moogar0880/negotiator
+import: []
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+  - require
