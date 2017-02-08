@@ -1,7 +1,6 @@
 package negotiator
 
 import (
-	"errors"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -9,11 +8,9 @@ import (
 )
 
 const (
+	// ContentTypeHeader is the constant value for the key indicating the
+	// Content-Type header
 	ContentTypeHeader = "Content-Type"
-)
-
-var (
-	NoContentTypeErr = errors.New("No Content-Type Header Provided")
 )
 
 // The ContentNegotiator interface defines the mechanism through which arbitrary
@@ -39,26 +36,24 @@ type ContentNegotiator interface {
 
 // MarshalMedia marshals the ContentNegotiator to the provided io.Writer, based
 // on an Accept. An error is returned if the ContentNegotiator's MarshalMedia
-// call fails, or if the data can't be written to io.Writer
+// call fails, or if the data can't be written to the io.Writer
 func MarshalMedia(w io.Writer, cn ContentNegotiator, acpt *Accept) error {
 	data, err := cn.MarshalMedia(acpt)
 	if err != nil {
 		return err
 	}
-
 	_, err = w.Write(data)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-// UnmarshalMedia handles unmarshalling the provided http request, using the
-// provided content negotiator
+// UnmarshalMedia handles unmarshalling an http.Request body, using a
+// ContentNegotiator instance. An error is returned if no Content-Type header
+// was provided, if the provided Content-Type header was poorly formatted, or
+// if the body of the http.Request could not be read.
 func UnmarshalMedia(req *http.Request, cn ContentNegotiator) error {
 	var header string
 	if header = req.Header.Get(ContentTypeHeader); len(header) == 0 {
-		return NoContentTypeErr
+		return ErrNoContentType
 	}
 
 	mediaType, params, err := mime.ParseMediaType(header)

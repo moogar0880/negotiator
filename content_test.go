@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +16,7 @@ const (
 	testContentNegotiatorType = "application/negotiated+json"
 )
 
-var invalidMediaType = errors.New("Invalid Media Type")
+var errInvalidMediaType = errors.New("Invalid Media Type")
 
 // testCN implements the ContentNegotiator interface for use in testing
 type testCN struct {
@@ -40,7 +41,7 @@ func (tcn *testCN) MarshalMedia(a *Accept) ([]byte, error) {
 		}
 		return data, nil
 	}
-	return nil, invalidMediaType
+	return nil, errInvalidMediaType
 }
 
 func (tcn *testCN) UnmarshalMedia(cType string, params ContentTypeParams, body []byte) error {
@@ -64,7 +65,7 @@ func TestUnmarshalRequest(t *testing.T) {
 		// test simple JSON case
 		{testContentNegotiatorType, `{"foo": "baz", "bar": 12}`, nil, *newTcn("baz", 12)},
 		// test with no content type header set
-		{"", `{"foo": "baz", "bar": 12}`, NoContentTypeErr, testCN{}},
+		{"", `{"foo": "baz", "bar": 12}`, ErrNoContentType, testCN{}},
 		// test with invalid media type
 		{"white space", `{"foo": "baz", "bar": 12}`,
 			errors.New("mime: expected slash after first token"), testCN{}},
@@ -95,22 +96,55 @@ func TestUnmarshalRequest(t *testing.T) {
 	}
 }
 
+var errBadReader = errors.New("UNABLE TO READ")
+
+type badReader struct{}
+
+func (r badReader) Read(_ []byte) (n int, err error) {
+	return 0, errBadReader
+}
+
+func (r badReader) Close() error {
+	return nil
+}
+
+func TestUnmarshalRequestBodyError(t *testing.T) {
+	testIO := []struct {
+		body io.ReadCloser
+		cn   *testCN
+		err  error
+	}{
+		// force an io.ReadCloser to error on read, and assert we get the expected
+		// error to bubble up
+		{body: badReader{}, cn: &testCN{}, err: errBadReader},
+	}
+
+	for _, test := range testIO {
+		t.Run(test.err.Error(), func(t *testing.T) {
+			req, _ := http.NewRequest("PUT", "http://example.com", test.body)
+			req.Header[ContentTypeHeader] = []string{testContentNegotiatorType}
+			err := UnmarshalMedia(req, test.cn)
+			assert.Equal(t, test.err, err)
+		})
+	}
+}
+
 func TestMarshalMedia(t *testing.T) {
 	testIO := []struct {
 		inp        *testCN
 		mediaRange mediaRange
+		w          io.Writer
 		err        error
 	}{
 		// zero value content negotiatior
-		{&testCN{}, testContentNegotiatorType, nil},
+		{&testCN{}, testContentNegotiatorType, httptest.NewRecorder(), nil},
 		// invalid media type
-		{&testCN{}, "application/json", invalidMediaType},
+		{&testCN{}, "application/json", httptest.NewRecorder(), errInvalidMediaType},
 	}
 
 	for _, test := range testIO {
 		t.Run(test.inp.Foo, func(t *testing.T) {
-			writer := httptest.NewRecorder()
-			err := MarshalMedia(writer,
+			err := MarshalMedia(test.w,
 				test.inp,
 				&Accept{MediaRange: test.mediaRange})
 
